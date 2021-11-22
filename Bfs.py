@@ -1,6 +1,7 @@
 import Puzzle
 from copy import deepcopy
 import sys
+from time import time
 
 sys.setrecursionlimit(99999999)
 
@@ -37,7 +38,7 @@ class Bfs:
     def __init__(self, file_name: str):
         self.table = Puzzle.Puzzle()
         self.table.setup(file_name)
-
+        self.time = time()
         self.parent_table = deepcopy(self.table)
         self.current_strategy = ['R', 'D', 'U', 'L']
         self.open_list = []
@@ -46,12 +47,18 @@ class Bfs:
         self.file_name = file_name  # Для того чтобы при нахождении решения мы записывали файл по типу
         self.solved_moves = ''       # SOLVED_{file_name}
 
+        print(f'Table :')
+        self.parent_table.print_table()
+        print(self.file_name)
+        self.solve(self.table)
+        self.write_to_file()
+
     def solve(self, table: Puzzle):
         self.table = table
 
         if self.table.is_solved():
-            print('gitara')
-            return self.table, self.count_steps(), self.solved_moves[::-1]
+            self.time = time() - self.time
+            return self.table, self.count_info(), self.solved_moves[::-1], self.time
 
         zero_cell = self.table.find_cell(0)
         zero_children = zero_cell.get_children(self.table)
@@ -90,7 +97,7 @@ class Bfs:
             self.get_table_from_open_list()
         return table
 
-    def count_steps(self):
+    def count_info(self):
         solved_table = deepcopy(self.table)
         while solved_table.string_hash() != self.parent_table.string_hash():
             # print(f"Step back : {self.steps_count}")
@@ -99,3 +106,27 @@ class Bfs:
             self.solved_moves += solved_table.get_move()
             solved_table = solved_table.get_parent_table()
         return self.steps_count
+
+    def get_steps(self) -> int:
+        return self.steps_count
+
+    def get_moves(self) -> str:
+        return self.solved_moves[::-1]
+
+    def get_table(self) -> []:
+        return self.table
+
+    def get_time(self) -> float:
+        return self.time
+
+    def write_to_file(self):
+        code_name = ''
+        for i in self.current_strategy:
+            code_name += i
+        file_name = 'Solves_BFS/' \
+                    + self.file_name.replace('Setups/', '').replace('.txt', '') \
+                    + '_bfs_' \
+                    + str(code_name) \
+                    + '_sol.txt'
+        with open(file_name, 'w') as file:
+            file.write(str(self.steps_count) + '\n' + str(self.get_moves()))
