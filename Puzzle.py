@@ -83,3 +83,11 @@ class Puzzle:
             for j in i:
                 test_hash += str(j.get())
         return test_hash
+
+    def is_equal(self, that_table : Puzzle) -> bool:
+        for i in range(4):
+            for j in range(4):
+                if self.table[i][j] != that_table.get_table()[i][j]:
+                    return False
+
+        return True

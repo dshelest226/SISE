@@ -2,7 +2,6 @@ import Puzzle
 from copy import deepcopy
 import sys
 from time import time
-from queue import Queue
 
 sys.setrecursionlimit(9999999)
 
@@ -43,12 +42,11 @@ class Bfs:
         self.time = time()
         self.parent_table = deepcopy(self.table)
         self.current_strategy = ['R', 'D', 'U', 'L']
-        self.open_list = Queue()
+        self.open_list = []
         self.closed_list = []
         self.steps_count = 0
         self.file_name = file_name  # Для того чтобы при нахождении решения мы записывали файл по типу
         self.solved_moves = ''  # SOLVED_{file_name}
-        self.counter = 0
 
         print(f'Table :')
         self.parent_table.print_table()
@@ -57,51 +55,64 @@ class Bfs:
         self.write_to_file()
 
     def solve(self, table: Puzzle):
-        self.open_list.put(table)
+        self.table = table
 
-        while True:
+        if self.table == 'Error' or len(self.closed_list) > 2700:
+            # print(len(self.closed_list))
+            return 0
 
-            self.check_closed_list()
+        # print(len(self.closed_list))
 
-            if self.table.is_solved():
-                self.time = time() - self.time
-                return self.table, self.count_info(), self.solved_moves[::-1], self.time
+        if self.table.is_solved():
+            self.time = time() - self.time
+            return self.table, self.count_info(), self.solved_moves[::-1], self.time
 
-            zero_cell = self.table.find_cell(0)
-            zero_children = zero_cell.get_children(self.table)
+        zero_cell = self.table.find_cell(0)
+        zero_children = zero_cell.get_children(self.table)
 
-            for i in range(len(self.current_strategy)):
-                direction_number = zero_children.get(self.current_strategy[i])
+        for i in range(len(self.current_strategy)):
+            direction_number = zero_children.get(self.current_strategy[i])
 
-                if direction_number is not None:
+            if direction_number is not None:
+                # print(direction_number.get())
 
-                    future_table = deepcopy(self.table)
-                    future_table.change_position(0, direction_number.get())
-                    future_table.set_parent_table(self.table)
-                    future_table.set_move(self.current_strategy[i])
+                future_table = deepcopy(self.table)
+                future_table.change_position(0, direction_number.get())
+                future_table.set_parent_table(self.table)
+                future_table.set_move(self.current_strategy[i])
 
-                    self.open_list.put(future_table)
+                self.open_list.append(future_table)
 
-            self.closed_list.append(self.table)
+        self.closed_list.append(self.table)
+        # print()
+        # print(len(self.open_list))
+        # print(len(self.closed_list))
+        # self.table.print_table()
+        try :
+            self.table = self.get_table_from_open_list()
+        except:
+            return 'Error'
 
-    def check_closed_list(self):
-        self.table = self.open_list.get()
+        return self.solve(self.get_table_from_open_list())
+
+    def check_closed_list(self, table: Puzzle):
         for i in self.closed_list:
-            if i.is_equal(self.table):
-                return self.check_closed_list()
+            if i.is_equal(table):
+                return False
+        return True
 
     def get_table_from_open_list(self):
-        # self.counter += 1
-        # print(self.counter)
-        table = self.open_list[0]  # FIFO , берем 1 элемент !
-        self.open_list.remove(self.open_list[0])
-        if not self.check_closed_list(table):
-            self.get_table_from_open_list()
-        return table
+            table = deepcopy(self.open_list[0])
+            self.open_list.remove(self.open_list[0])
+            if not self.check_closed_list(table):
+                self.get_table_from_open_list()
+            return table
 
     def count_info(self):
         solved_table = deepcopy(self.table)
         while solved_table.string_hash() != self.parent_table.string_hash():
+            # print(f"Step back : {self.steps_count}")
+            # solved_table.print_table()
             self.steps_count += 1
             self.solved_moves += solved_table.get_move()
             solved_table = solved_table.get_parent_table()
@@ -125,7 +136,7 @@ class Bfs:
             code_name += i
         file_name = 'Solves_BFS/' \
                     + self.file_name.replace('Setups/', '').replace('.txt', '') \
-                    + '_bfs_' \
+                    + '_dfs_' \
                     + str(code_name) \
                     + '_sol.txt'
 
@@ -133,6 +144,6 @@ class Bfs:
             with open(file_name, 'w') as file:
                 file.write("-1")
 
-        else:
+        else :
             with open(file_name, 'w') as file:
                 file.write(str(self.steps_count) + '\n' + str(self.get_moves()))
