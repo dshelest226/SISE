@@ -37,12 +37,12 @@ strategies = [
 
 
 class Bfs:
-    def __init__(self, file_name: str):
+    def __init__(self, file_name: str, number_of_stretegies=0):
         self.table = Puzzle.Puzzle()
         self.table.setup(file_name)
         self.time = time()
         self.parent_table = deepcopy(self.table)
-        self.current_strategy = ['R', 'D', 'U', 'L']
+        self.current_strategy = strategies[number_of_stretegies]
         self.open_list = Queue()
         self.closed_list = []
         self.steps_count = 0
@@ -67,8 +67,7 @@ class Bfs:
                 self.time = time() - self.time
                 return self.table, self.count_info(), self.solved_moves[::-1], self.time
 
-            zero_cell = self.table.find_cell(0)
-            zero_children = zero_cell.get_children(self.table)
+            zero_children = self.table.get_children()
 
             for i in range(len(self.current_strategy)):
                 direction_number = zero_children.get(self.current_strategy[i])
@@ -76,7 +75,7 @@ class Bfs:
                 if direction_number is not None:
 
                     future_table = deepcopy(self.table)
-                    future_table.change_position(0, direction_number.get())
+                    future_table.change_position(0, direction_number)
                     future_table.set_parent_table(self.table)
                     future_table.set_move(self.current_strategy[i])
 
@@ -90,18 +89,18 @@ class Bfs:
             if i.is_equal(self.table):
                 return self.check_closed_list()
 
-    def get_table_from_open_list(self):
-        # self.counter += 1
-        # print(self.counter)
-        table = self.open_list[0]  # FIFO , берем 1 элемент !
-        self.open_list.remove(self.open_list[0])
-        if not self.check_closed_list(table):
-            self.get_table_from_open_list()
-        return table
+    # def get_table_from_open_list(self):
+    #     # self.counter += 1
+    #     # print(self.counter)
+    #     table = self.open_list[0]  # FIFO , берем 1 элемент !
+    #     self.open_list.remove(self.open_list[0])
+    #     if not self.check_closed_list(table):
+    #         self.get_table_from_open_list()
+    #     return table
 
     def count_info(self):
         solved_table = deepcopy(self.table)
-        while solved_table.string_hash() != self.parent_table.string_hash():
+        while solved_table.hash_code() != self.parent_table.hash_code():
             self.steps_count += 1
             self.solved_moves += solved_table.get_move()
             solved_table = solved_table.get_parent_table()
