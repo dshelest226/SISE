@@ -10,7 +10,7 @@ class Puzzle:
     def __init__(self):
         self.table = [[] for i in range(4)]
         self.parent_table = None  # Записываем родительский сетап
-        self.moved_to = None  # Для рапорта требуется последовательность движений
+        self.moved_to = ""  # Для рапорта требуется последовательность движений
         self.children = {}
         self.depth = 0
 
@@ -38,8 +38,9 @@ class Puzzle:
     def get_table(self) -> []:
         return self.table
 
-    # def set_table(self, table):
-    #     self.table = deepcopy(table)
+    def set_table(self, table : Puzzle):
+        # self.table = deepcopy(table)
+        self.table = deepcopy(table.get_table())
 
     def set_parent_table(self, table):
         self.parent_table = table
@@ -58,6 +59,9 @@ class Puzzle:
 
     def set_move(self, move : str):
         self.moved_to = move
+
+    def add_move(self, move : str):
+        self.moved_to += move
 
     def find_cell_location(self, cell : int):
         for i in range(4):
