@@ -164,3 +164,21 @@ class Puzzle:
 
     def hash_code(self):
         return hash(str(self.table))
+
+    def change_with_direction_reverse(self, direction : str):
+        self.get_children()
+
+        if direction == 'U' :
+            direction = 'D'
+
+        elif direction == 'D' :
+            direction = 'U'
+
+        elif direction == 'L' :
+            direction = 'R'
+
+        elif direction == 'R' :
+            direction = 'L'
+
+        direction_number = self.children.get(direction)
+        self.change_position(0, direction_number)

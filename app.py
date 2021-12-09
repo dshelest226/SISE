@@ -183,11 +183,15 @@ def dfs(start_time):
             else:
                 depth_level = len(current_node.way) - 1
             return current_node.way, amount_of_processed_nodes, amount_of_visited_nodes, depth_level
+
+
         elif len(current_node.way) == DEPTH:
             current_node = current_node.parent
             find_and_set_empty_field(current_node.board)
             parent_flag = True
             max_depth = True
+
+
         elif len(current_node.to_visit) != 0:
             if not root_flag and not parent_flag:
                 remove_ways_to_out_of_board(current_node)

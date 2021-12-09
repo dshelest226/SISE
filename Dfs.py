@@ -47,7 +47,7 @@ class Dfs:
 
             self.check_closed_list()
 
-            print(len(self.closed_list))
+            # print(len(self.closed_list))
 
             if self.table.is_solved():
                 self.time = time() - self.time
