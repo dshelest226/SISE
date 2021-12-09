@@ -1,8 +1,7 @@
 import Puzzle
 from collections import deque
 import sys
-
-sys.setrecursionlimit(9999999)
+from time import time
 
 MAX_DEPTH = 20
 strategies = [
@@ -24,7 +23,7 @@ class dfs_test:
         self.table.setup(file_name)
         self.strategy = strategies[0]
         # self.last_move = ''
-        self.test = 0
+        self.time = time()
 
     def get_element_id(self, elem):
         for i in range(len(self.strategy)):
@@ -98,83 +97,96 @@ class dfs_test:
     #             last_element = False
 
     def solve(self, rollback=False, rollback_last=False, last_move='', was_rollback=False, cannot_move=False):
-        self.test += 1
-        print(self.moves)
-        if self.table.is_solved():
-            return self.table.print_table()
+        test = 0
+        while True :
+            action = True
+            print(self.moves)
+            test += 1
+            print(f'counter {test}')
+            # print(self.moves)
 
-        if len(self.moves) == MAX_DEPTH and not(rollback or rollback_last or was_rollback):
+            if self.table.is_solved():
+                # print(time() - self.time)
+                print(self.moves)
+                print('==========')
+                return self.table
 
-            if self.moves[-1] == self.strategy[-1]:
-                rollback_last = True
+            if len(self.moves) == MAX_DEPTH and not(rollback or rollback_last or was_rollback) and action:
+                action = False
 
-            else :
-                rollback = True
-
-            last_move = self.moves[-1]
-            return self.solve(rollback, rollback_last, last_move, was_rollback)
-
-        if rollback or rollback_last:
-
-            if rollback:
-                rollback = False
-                last_move = self.moves.pop()
-                self.table.change_with_direction_reverse(last_move)
-
-                if self.moves[-1] == self.strategy[-1] and (last_move == self.strategy[-1] or cannot_move):
+                if self.moves[-1] == self.strategy[-1]:
                     rollback_last = True
-                was_rollback = True
+
+                else :
+                    rollback = True
+
+                last_move = self.moves[-1]
+                # return self.solve(rollback, rollback_last, last_move, was_rollback)
+
+            if (rollback or rollback_last) and action:
+                action = False
+                if rollback:
+                    rollback = False
+                    last_move = self.moves.pop()
+                    self.table.change_with_direction_reverse(last_move)
+
+                    if self.moves[-1] == self.strategy[-1] and (last_move == self.strategy[-1] or cannot_move):
+                        cannot_move = False
+                        rollback_last = True
+                    was_rollback = True
 
 
-                return self.solve(rollback, rollback_last, last_move, was_rollback)
+                    # return self.solve(rollback, rollback_last, last_move, was_rollback)
 
-            if rollback_last:
-                rollback_last = False
-                last_move = self.moves.pop()
-                self.table.change_with_direction_reverse(last_move)
-                # last_move = self.moves.pop()
-                # self.table.change_with_direction_reverse(last_move)
+                if rollback_last:
+                    rollback_last = False
+                    last_move = self.moves.pop()
+                    self.table.change_with_direction_reverse(last_move)
+                    # last_move = self.moves.pop()
+                    # self.table.change_with_direction_reverse(last_move)
 
-                was_rollback = True
-                if last_move == self.strategy[-1]:
-                    rollback_last = True  # Может тут ставить rollback_last ?
-                    was_rollback = False
-                return self.solve(rollback, rollback_last, last_move, was_rollback)
+                    was_rollback = True
+                    if last_move == self.strategy[-1]:
+                        rollback_last = True  # Может тут ставить rollback_last ?
+                        was_rollback = False
+                    # return self.solve(rollback, rollback_last, last_move, was_rollback)
 
-        if was_rollback and not (rollback or rollback_last):
-            was_rollback = False
-            children = self.table.get_children()
-            changed = False
-            for i in range(self.get_element_id(last_move) + 1, len(self.strategy)):
-                if children.get(self.strategy[i]) is not None and not changed:
-                    self.table.change_position(0,
-                                               children.get(self.strategy[i]))
-                    changed = True
-                    self.moves.append(self.strategy[i])
-                    last_move = self.strategy[i]
+            if action and was_rollback and not (rollback or rollback_last):
+                action = False
+                was_rollback = False
+                children = self.table.get_children()
+                changed = False
+                for i in range(self.get_element_id(last_move) + 1, len(self.strategy)):
+                    if children.get(self.strategy[i]) is not None and not changed:
+                        self.table.change_position(0,
+                                                   children.get(self.strategy[i]))
+                        changed = True
+                        self.moves.append(self.strategy[i])
+                        last_move = self.strategy[i]
 
-            if not changed:
-                cannot_move = True
-                rollback = True
+                if not changed:
+                    cannot_move = True
+                    rollback = True
 
-            return self.solve(rollback, rollback_last, last_move, was_rollback, cannot_move)
+                # return self.solve(rollback, rollback_last, last_move, was_rollback, cannot_move)
 
-        if not (was_rollback or rollback_last or rollback) :
-            children = self.table.get_children()
-            changed = False
-            for i in range(len(self.strategy)):
-                if children.get(self.strategy[i]) is not None and not changed:
-                    self.table.change_position(0,
-                                               children.get(self.strategy[i]))
-                    changed = True
-                    self.moves.append(self.strategy[i])
-                    last_move = self.strategy[i]
+            if action and not (was_rollback or rollback_last or rollback) :
+                action = False
+                children = self.table.get_children()
+                changed = False
+                for i in range(len(self.strategy)):
+                    if children.get(self.strategy[i]) is not None and not changed:
+                        self.table.change_position(0,
+                                                   children.get(self.strategy[i]))
+                        changed = True
+                        self.moves.append(self.strategy[i])
+                        last_move = self.strategy[i]
 
-            if not changed:
-                cannot_move = True
-                rollback = True
+                if not changed:
+                    cannot_move = True
+                    rollback = True
 
-            return self.solve(rollback, rollback_last, last_move, was_rollback, cannot_move)
+                # return self.solve(rollback, rollback_last, last_move, was_rollback, cannot_move)
 
 
 

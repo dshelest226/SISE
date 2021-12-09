@@ -5,18 +5,20 @@ from Dfs import *
 from glob import glob
 from numpy import genfromtxt
 from DFS_Test import dfs_test
-
+from time import time
 
 def print_hi():
     strategy = 0
+    start = time()
     # for i in glob("./Setups/*"):
     #     for strategy in range(8):
-    i = './Setups\\4x4_06_00007.txt'
+    i = './Setups\\4x4_07_00001.txt'
     dfs_test1 = dfs_test(i.replace("\\", "/"))
     # a = dfs_test1.solve()
     # a.print_table()
-    dfs_test1.table.print_table()
+    print(i)
     dfs_test1.solve()
+    print(time() - start)
     # try:
     # dfs = Dfs(i.replace("\\", "/"), strategy)
     # print()
