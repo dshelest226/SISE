@@ -1,6 +1,10 @@
 import Puzzle
+from collections import deque
+import sys
 
-MAX_DEPTH = 6
+sys.setrecursionlimit(9999999)
+
+MAX_DEPTH = 20
 strategies = [
     ['R', 'D', 'U', 'L'],
     ['R', 'D', 'L', 'U'],
@@ -15,7 +19,7 @@ strategies = [
 
 class dfs_test:
     def __init__(self, file_name : str):
-        self.moves = []
+        self.moves = deque()
         self.table = Puzzle.Puzzle()
         self.table.setup(file_name)
         self.strategy = strategies[0]
@@ -95,7 +99,7 @@ class dfs_test:
 
     def solve(self, rollback=False, rollback_last=False, last_move='', was_rollback=False, cannot_move=False):
         self.test += 1
-        print(self.test)
+        print(self.moves)
         if self.table.is_solved():
             return self.table.print_table()
 
@@ -116,14 +120,11 @@ class dfs_test:
                 rollback = False
                 last_move = self.moves.pop()
                 self.table.change_with_direction_reverse(last_move)
-                try:
-                    if self.moves[-1] == self.strategy[-1] and (last_move == self.strategy[-1] or cannot_move):
-                        rollback_last = True
-                    was_rollback = True
-                except IndexError:
-                    print(self.moves)
-                    print(last_move)
-                    return 0
+
+                if self.moves[-1] == self.strategy[-1] and (last_move == self.strategy[-1] or cannot_move):
+                    rollback_last = True
+                was_rollback = True
+
 
                 return self.solve(rollback, rollback_last, last_move, was_rollback)
 
