@@ -1,43 +1,65 @@
-import Puzzle
-from copy import deepcopy
-from Bfs import *
-from Dfs import *
-from glob import glob
-from numpy import genfromtxt
-from DFS_Test import dfs_test
-from time import time
+from bfs import Bfs
+from dfs import Dfs
+from astar import AStar
+import argparse
 
-def print_hi():
-    strategy = 0
-    start = time()
-    # for i in glob("./Setups/*"):
-    #     for strategy in range(8):
-    i = './Setups\\4x4_07_00001.txt'
-    dfs_test1 = dfs_test(i.replace("\\", "/"))
-    # a = dfs_test1.solve()
-    # a.print_table()
-    print(i)
-    dfs_test1.solve()
-    print(time() - start)
-    # try:
-    # dfs = Dfs(i.replace("\\", "/"), strategy)
-    # print()
-    # dfs.get_table().print_table()
-    # print(f'\nStep count : {dfs.get_steps()}')
-    # print(f'SOLVED MOVES : {dfs.get_moves()}')
-    # print(f'Time : {dfs.get_time()}')
-    # del dfs
-# except :
-#         print(i)
-#         print("No solution")
 
-    # a = Puzzle.Puzzle()
-    # a.setup('./Setups/4x4_07_00207.txt')
-    # a.print_table()
-    # b = deepcopy(a)
-    # print(hash(str(a.get_table())))
+def write_to_files(sol_info, sol_stat, sol_file, stat_file):
+
+    with open(sol_file, 'w') as file:
+        file.write(sol_info)
+
+    with open(stat_file, 'w') as file:
+        file.write(sol_stat)
+
 
 if __name__ == '__main__':
-    print_hi()
+    parser = argparse.ArgumentParser(description="Algorithm, Order/Heuristic,"
+                                                 "Source file, Solution file, Statistics file.")
+    parser.add_argument('algorithm')
+    parser.add_argument('order')
+    parser.add_argument('source_file')
+    parser.add_argument('solution_file')
+    parser.add_argument('statistic_file')
+    args = parser.parse_args()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    stategy_code = {
+        'RDUL' : 0, 'RDLU' : 1,
+        'DRUL' : 2, 'DRLU' : 3,
+        'LUDR' : 4, 'LURD' : 5,
+        'ULDR' : 6, 'ULRD' : 7
+    }
+
+    solution_info = ''
+    stats_info = ''
+
+    if args.algorithm.lower() == 'bfs' :
+        if stategy_code.get(args.order.upper()) is not None:
+            code = stategy_code.get(args.order.upper())
+            sol = Bfs(args.source_file, code)
+            solution_info, stats_info = sol.solve()
+        else :
+            print('ORDER ERROR')
+
+    elif args.algorithm.lower() == 'dfs' :
+        if stategy_code.get(args.order.upper()) is not None:
+            code = stategy_code.get(args.order.upper())
+            sol = Dfs(args.source_file, code)
+            solution_info, stats_info = sol.solve()
+        else:
+            print('ORDER ERROR')
+
+    elif args.algorithm.lower() == 'astr':
+        if args.order.lower() in ['manh', 'hamm']:
+            sol = AStar(args.source_file, args.order.lower())
+            solution_info, stats_info = sol.solve()
+        else:
+            print('ORDER ERROR')
+
+    else :
+        print('Alghorytm error')
+
+    write_to_files(solution_info, stats_info, args.solution_file, args.statistic_file)
+
+
+
